@@ -1,23 +1,23 @@
 # Google Keyworder
 
-Google 关键字搜索截图和录影工具，可以将输入的关键字通过 Google 引擎搜索并截图结果，或使用录影储存过程。
+Google 關鍵字搜尋截圖和錄影工具，可以將輸入的關鍵字透過 Google 引擎搜尋並截圖結果，或使用錄影儲存過程。
 
 ## 功能特性
 
-- 🔍 自动执行 Google 关键字搜索
-- 📸 对搜索结果进行全页截图
-- 🎥 录制搜索过程视频
-- 🚀 使用 uv 作为包管理工具
-- 💻 简单的命令行界面
+- 🔍 自動執行 Google 關鍵字搜尋
+- 📸 對搜尋結果進行全頁截圖
+- 🎥 錄製搜尋過程影片
+- 🚀 使用 uv 作為套件管理工具
+- 💻 簡單的命令列介面
 
-## 系统要求
+## 系統要求
 
 - Python >= 3.10
-- [uv](https://github.com/astral-sh/uv) 包管理工具
+- [uv](https://github.com/astral-sh/uv) 套件管理工具
 
-## 安装
+## 安裝
 
-### 1. 安装 uv（如果尚未安装）
+### 1. 安裝 uv（如果尚未安裝）
 
 ```bash
 # Linux/macOS
@@ -27,150 +27,150 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### 2. 克隆项目
+### 2. 複製專案
 
 ```bash
 git clone <repository-url>
 cd GoogleKeyworder
 ```
 
-### 3. 使用 uv 安装依赖
+### 3. 使用 uv 安裝相依套件
 
 ```bash
-# 同步依赖
+# 同步相依套件
 uv sync
 
-# 安装 Playwright 浏览器
+# 安裝 Playwright 瀏覽器
 uv run playwright install chromium
 ```
 
 ## 使用方法
 
-### 截图模式
+### 截圖模式
 
-对 Google 搜索结果进行截图：
-
-```bash
-# 基本使用
-uv run google-keyworder screenshot "Python 教程"
-
-# 指定输出目录和等待时间
-uv run google-keyworder screenshot "机器学习" -o screenshots -w 5
-```
-
-参数说明：
-- `keyword`: 搜索关键字（必需）
-- `-o, --output`: 输出目录（默认: output）
-- `-w, --wait`: 等待页面加载时间，单位秒（默认: 3）
-
-### 录影模式
-
-对 Google 搜索过程进行录影：
+對 Google 搜尋結果進行截圖：
 
 ```bash
 # 基本使用
-uv run google-keyworder record "Python 教程"
+uv run google-keyworder screenshot "Python 教學"
 
-# 指定输出目录和录影时长
-uv run google-keyworder record "机器学习" -o videos -d 15
+# 指定輸出目錄和等待時間
+uv run google-keyworder screenshot "機器學習" -o screenshots -w 5
 ```
 
-参数说明：
-- `keyword`: 搜索关键字（必需）
-- `-o, --output`: 输出目录（默认: output）
-- `-d, --duration`: 录影时长，单位秒（默认: 10）
+參數說明：
+- `keyword`: 搜尋關鍵字（必需）
+- `-o, --output`: 輸出目錄（預設: output）
+- `-w, --wait`: 等待頁面載入時間，單位秒（預設: 3）
 
-### 同时截图和录影
+### 錄影模式
+
+對 Google 搜尋過程進行錄影：
 
 ```bash
 # 基本使用
-uv run google-keyworder both "Python 教程"
+uv run google-keyworder record "Python 教學"
 
-# 完整参数
-uv run google-keyworder both "机器学习" -o results -w 5 -d 15
+# 指定輸出目錄和錄影時長
+uv run google-keyworder record "機器學習" -o videos -d 15
 ```
 
-参数说明：
-- `keyword`: 搜索关键字（必需）
-- `-o, --output`: 输出目录（默认: output）
-- `-w, --wait`: 截图等待时间，单位秒（默认: 3）
-- `-d, --duration`: 录影时长，单位秒（默认: 10）
+參數說明：
+- `keyword`: 搜尋關鍵字（必需）
+- `-o, --output`: 輸出目錄（預設: output）
+- `-d, --duration`: 錄影時長，單位秒（預設: 10）
 
-## 输出文件
+### 同時截圖和錄影
 
-### 文件命名规则
+```bash
+# 基本使用
+uv run google-keyworder both "Python 教學"
 
-输出文件会自动根据关键字和时间戳命名：
+# 完整參數
+uv run google-keyworder both "機器學習" -o results -w 5 -d 15
+```
+
+參數說明：
+- `keyword`: 搜尋關鍵字（必需）
+- `-o, --output`: 輸出目錄（預設: output）
+- `-w, --wait`: 截圖等待時間，單位秒（預設: 3）
+- `-d, --duration`: 錄影時長，單位秒（預設: 10）
+
+## 輸出檔案
+
+### 檔案命名規則
+
+輸出檔案會自動根據關鍵字和時間戳記命名：
 
 ```
-<关键字>_<时间戳>.<扩展名>
+<關鍵字>_<時間戳記>.<副檔名>
 ```
 
-示例：
-- `Python_教程_20250131_143022.png`（截图）
-- `机器学习_20250131_143022.webm`（录影）
+範例：
+- `Python_教學_20250131_143022.png`（截圖）
+- `機器學習_20250131_143022.webm`（錄影）
 
-### 输出格式
+### 輸出格式
 
-- **截图**: PNG 格式，全页截图
-- **录影**: WebM 格式，1920x1080 分辨率
+- **截圖**: PNG 格式，全頁截圖
+- **錄影**: WebM 格式，1920x1080 解析度
 
-## 项目结构
+## 專案結構
 
 ```
 GoogleKeyworder/
 ├── google_keyworder/
-│   ├── __init__.py       # 包初始化文件
-│   └── main.py           # 主程序
-├── pyproject.toml        # 项目配置（uv 管理）
-├── README.md             # 说明文档
-└── output/               # 默认输出目录（自动创建）
+│   ├── __init__.py       # 套件初始化檔案
+│   └── main.py           # 主程式
+├── pyproject.toml        # 專案配置（uv 管理）
+├── README.md             # 說明文件
+└── output/               # 預設輸出目錄（自動建立）
 ```
 
-## 技术栈
+## 技術棧
 
-- **包管理**: [uv](https://github.com/astral-sh/uv) - 快速的 Python 包管理工具
-- **浏览器自动化**: [Playwright](https://playwright.dev/) - 现代化的浏览器自动化工具
-- **命令行界面**: [Click](https://click.palletsprojects.com/) - Python 命令行框架
+- **套件管理**: [uv](https://github.com/astral-sh/uv) - 快速的 Python 套件管理工具
+- **瀏覽器自動化**: [Playwright](https://playwright.dev/) - 現代化的瀏覽器自動化工具
+- **命令列介面**: [Click](https://click.palletsprojects.com/) - Python 命令列框架
 
-## 开发
+## 開發
 
-### 运行测试
+### 執行測試
 
 ```bash
 uv run pytest
 ```
 
-### 添加新依赖
+### 新增相依套件
 
 ```bash
 uv add <package-name>
 ```
 
-### 更新依赖
+### 更新相依套件
 
 ```bash
 uv sync --upgrade
 ```
 
-## 常见问题
+## 常見問題
 
-### Q: 为什么需要安装 Playwright 浏览器？
+### Q: 為什麼需要安裝 Playwright 瀏覽器？
 
-A: Playwright 需要下载浏览器二进制文件才能运行。使用 `uv run playwright install chromium` 命令安装。
+A: Playwright 需要下載瀏覽器二進制檔案才能執行。使用 `uv run playwright install chromium` 命令安裝。
 
-### Q: 可以自定义浏览器窗口大小吗？
+### Q: 可以自訂瀏覽器視窗大小嗎？
 
-A: 可以。在 `main.py` 的 `search_and_record` 方法中修改 `record_video_size` 参数。
+A: 可以。在 `main.py` 的 `search_and_record` 方法中修改 `record_video_size` 參數。
 
-### Q: 支持其他搜索引擎吗？
+### Q: 支援其他搜尋引擎嗎？
 
-A: 目前仅支持 Google。如需支持其他搜索引擎，可以修改 `main.py` 中的 `search_url`。
+A: 目前僅支援 Google。如需支援其他搜尋引擎，可以修改 `main.py` 中的 `search_url`。
 
-## 许可证
+## 授權條款
 
 MIT License
 
-## 贡献
+## 貢獻
 
-欢迎提交 Issue 和 Pull Request！
+歡迎提交 Issue 和 Pull Request！
