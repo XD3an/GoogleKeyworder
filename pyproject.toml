@@ -1,0 +1,22 @@
+[project]
+name = "google-keyworder"
+version = "0.1.0"
+description = "Google 关键字搜索截图和录影工具"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright>=1.40.0",
+    "click>=8.1.7",
+]
+
+[project.scripts]
+google-keyworder = "google_keyworder.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+]
