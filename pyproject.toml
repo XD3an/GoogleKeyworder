@@ -1,7 +1,7 @@
 [project]
 name = "google-keyworder"
 version = "0.1.0"
-description = "Google 关键字搜索截图和录影工具"
+description = "Google 關鍵字搜尋截圖和錄影工具"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
