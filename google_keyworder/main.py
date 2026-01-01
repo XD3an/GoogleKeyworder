@@ -1,9 +1,8 @@
-"""Google 關鍵字搜尋截圖和錄影工具 - 主程式"""
-
 import asyncio
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import click
 from playwright.async_api import async_playwright
 
@@ -23,11 +22,38 @@ class GoogleSearchCapture:
         safe_keyword = safe_keyword.replace(' ', '_')[:50]
         return self.output_dir / f"{safe_keyword}_{self.timestamp}.{extension}"
 
-    async def search_and_screenshot(self, wait_time: int = 3) -> Path:
+    async def _smooth_scroll(self, page) -> None:
+        """平滑滾動頁面以載入所有內容"""
+        # 取得頁面總高度
+        scroll_height = await page.evaluate("document.body.scrollHeight")
+        viewport_height = await page.evaluate("window.innerHeight")
+
+        # 計算需要滾動的次數
+        current_position = 0
+        scroll_step = viewport_height * 0.5  # 每次滾動 50% 的視窗高度(減少步進距離)
+
+        while current_position < scroll_height:
+            # 滾動到下一個位置
+            current_position += scroll_step
+            await page.evaluate(f"window.scrollTo({{top: {current_position}, behavior: 'smooth'}})")
+
+            # 等待更久讓內容載入和動畫完成
+            await asyncio.sleep(1.5)
+
+            # 更新總高度(因為可能有動態載入的內容)
+            new_scroll_height = await page.evaluate("document.body.scrollHeight")
+            if new_scroll_height > scroll_height:
+                scroll_height = new_scroll_height
+
+        # 滾動回頂部
+        await page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
+        await asyncio.sleep(1)
+
+    async def search_and_screenshot(self, wait_time: int = 10) -> Path:
         """執行 Google 搜尋並截圖
 
         Args:
-            wait_time: 等待頁面載入的時間（秒）
+            wait_time: 等待頁面載入的時間(秒)
 
         Returns:
             截圖檔案路徑
@@ -35,19 +61,55 @@ class GoogleSearchCapture:
         screenshot_path = self._get_filename("png")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
+            # 使用更真實的瀏覽器設定
+            browser = await p.chromium.launch(
+                headless=False,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox'
+                ]
+            )
+
+            # 設定 context 以模擬真實瀏覽器
+            context = await browser.new_context(
+                viewport={'width': 1920, 'height': 1080},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            )
+
+            page = await context.new_page()
+
+            # 隱藏 webdriver 特徵
+            await page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
 
             # 訪問 Google 搜尋
             search_url = f"https://www.google.com/search?q={self.keyword}"
-            await page.goto(search_url)
+            await page.goto(search_url, wait_until='networkidle')
+
+            # 檢查是否有 CAPTCHA
+            captcha_exists = await page.locator('iframe[src*="recaptcha"]').count() > 0
+            if captcha_exists:
+                click.echo("⚠️  偵測到 CAPTCHA 驗證，請手動完成驗證...")
+                click.echo(f"等待 {wait_time} 秒供您完成驗證...")
 
             # 等待頁面載入
+            await asyncio.sleep(2)
+
+            # 自動向下滾動以載入所有內容
+            click.echo("正在滾動頁面載入完整內容...")
+            await self._smooth_scroll(page)
+
+            # 額外等待確保內容完全載入
             await asyncio.sleep(wait_time)
 
             # 截圖
             await page.screenshot(path=str(screenshot_path), full_page=True)
 
+            await context.close()
             await browser.close()
 
         return screenshot_path
@@ -56,7 +118,7 @@ class GoogleSearchCapture:
         """執行 Google 搜尋並錄影
 
         Args:
-            duration: 錄影時長（秒）
+            duration: 錄影時長(秒)
 
         Returns:
             錄影檔案路徑
@@ -64,19 +126,52 @@ class GoogleSearchCapture:
         video_path = self._get_filename("webm")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            # 使用更真實的瀏覽器設定
+            browser = await p.chromium.launch(
+                headless=False,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox'
+                ]
+            )
+
             context = await browser.new_context(
                 record_video_dir=str(self.output_dir),
-                record_video_size={"width": 1920, "height": 1080}
+                record_video_size={"width": 1920, "height": 1080},
+                viewport={'width': 1920, 'height': 1080},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             )
+
             page = await context.new_page()
+
+            # 隱藏 webdriver 特徵
+            await page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
 
             # 訪問 Google 搜尋
             search_url = f"https://www.google.com/search?q={self.keyword}"
-            await page.goto(search_url)
+            await page.goto(search_url, wait_until='networkidle')
 
-            # 等待指定時長
-            await asyncio.sleep(duration)
+            # 檢查是否有 CAPTCHA
+            captcha_exists = await page.locator('iframe[src*="recaptcha"]').count() > 0
+            if captcha_exists:
+                click.echo("⚠️  偵測到 CAPTCHA 驗證,請手動完成驗證...")
+                click.echo(f"錄影將持續 {duration} 秒...")
+
+            # 等待頁面初始載入
+            await asyncio.sleep(2)
+
+            # 自動向下滾動
+            click.echo("正在滾動頁面...")
+            await self._smooth_scroll(page)
+
+            # 繼續等待剩餘時間
+            remaining_time = max(0, duration - 4)  # 減去已使用的時間
+            await asyncio.sleep(remaining_time)
 
             # 關閉頁面和上下文以儲存影片
             await page.close()
